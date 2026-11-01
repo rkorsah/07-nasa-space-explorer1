@@ -79,15 +79,16 @@
           <p id="galleryStatus" role="status" aria-live="polite"></p>
         </div>
 
-        <div class="loading" id="loadingMessage" role="status" aria-live="polite" hidden>
-          <span class="spinner" aria-hidden="true"></span>
-          <span>
-            <strong>Gathering the latest discoveries…</strong>
-            <small>Connecting to NASA's Astronomy Picture of the Day API</small>
-          </span>
-        </div>
         <p class="error" id="errorMessage" role="alert" hidden></p>
-        <div class="gallery" id="gallery" aria-label="NASA Astronomy Picture of the Day gallery"></div>
+        <div class="gallery" id="gallery" aria-label="NASA Astronomy Picture of the Day gallery">
+          <div class="loading" id="loadingMessage" role="status" aria-live="polite" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <span>
+              <strong>Gathering the latest discoveries…</strong>
+              <small>Connecting to NASA's Astronomy Picture of the Day API</small>
+            </span>
+          </div>
+        </div>
       </section>
     </main>
 

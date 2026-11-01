@@ -284,6 +284,11 @@ a:focus-visible {
   gap: 14px;
 }
 
+.gallery > .loading {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
 .loading[hidden],
 .error[hidden] {
   display: none;

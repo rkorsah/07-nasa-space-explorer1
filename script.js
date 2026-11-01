@@ -196,6 +196,7 @@ async function fetchGallery(event) {
 	errorMessage.hidden = true;
 	errorMessage.textContent = '';
 	gallery.replaceChildren();
+	gallery.appendChild(loadingMessage);
 	galleryStatus.textContent = '';
 	loadingMessage.hidden = false;
 	const controller = new AbortController();
