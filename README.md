@@ -7,16 +7,17 @@ title, date, and explanation.
 
 ## Run the project
 
-Open `index.html` in a modern browser while connected to the internet. The
-gallery fetches data from NASA's public APOD API and uses `DEMO_KEY` by default.
-For higher API limits, request a key at [api.nasa.gov](https://api.nasa.gov/)
-and enter it in the NASA API key field. The key is sent to NASA with the API
-request and is not saved by this page.
+Open `index.html` in a modern browser while connected to the internet. Select
+a date range and choose **Get Space Images** to fetch data from NASA's public
+APOD API. The page uses `DEMO_KEY` by default. For higher API limits, request
+a key at [api.nasa.gov](https://api.nasa.gov/) and enter it in the NASA API
+key field. The key is sent to NASA with the API request and is not saved by
+this page.
 
-Choose a start date and an end date exactly eight days later. The dates are
-inclusive, so the request returns nine consecutive entries. APOD video entries
-are marked in the gallery and include a link to watch the video in the detail
-dialog.
+Choose nine consecutive dates, with the end date exactly eight days after the
+start date. APOD dates begin June 16, 1995, and cannot be later than today.
+APOD video entries are marked in the gallery and include a link to watch the
+video in the detail dialog.
 
 ## Reflections
 

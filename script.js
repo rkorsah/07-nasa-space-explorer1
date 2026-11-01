@@ -14,6 +14,7 @@ const modalDate = document.getElementById('modalDate');
 const modalTitle = document.getElementById('modalTitle');
 const modalCredit = document.getElementById('modalCredit');
 const modalExplanation = document.getElementById('modalExplanation');
+const earliestApodDate = '1995-06-16';
 
 const spaceFacts = [
 	'Neutron stars can spin hundreds of times every second.',
@@ -28,14 +29,18 @@ function getDateString(date) {
 }
 
 function setDefaultDates() {
-	const yesterday = new Date();
-	yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-	const startDate = new Date(yesterday);
+	const today = new Date();
+	const latestDate = getDateString(today);
+	const lastAvailableDay = new Date(today);
+	lastAvailableDay.setUTCDate(lastAvailableDay.getUTCDate() - 1);
+	const startDate = new Date(lastAvailableDay);
 	startDate.setUTCDate(startDate.getUTCDate() - 8);
-	const latestDate = getDateString(yesterday);
+	const endDate = getDateString(lastAvailableDay);
 
 	startDateInput.value = getDateString(startDate);
-	endDateInput.value = latestDate;
+	endDateInput.value = endDate;
+	startDateInput.min = earliestApodDate;
+	endDateInput.min = earliestApodDate;
 	startDateInput.max = latestDate;
 	endDateInput.max = latestDate;
 }
@@ -62,6 +67,12 @@ function validateDateRange(startDate, endDate) {
 
 	if (!Number.isFinite(startTime) || !Number.isFinite(endTime)) {
 		throw new Error('Choose a valid start date and end date.');
+	}
+
+	const today = getDateString(new Date());
+
+	if (startDate < earliestApodDate || endDate < earliestApodDate || endDate > today) {
+		throw new Error(`Choose APOD dates between ${earliestApodDate} and today.`);
 	}
 
 	if (daysBetween !== 8) {
@@ -187,6 +198,10 @@ async function fetchGallery(event) {
 	gallery.replaceChildren();
 	galleryStatus.textContent = '';
 	loadingMessage.hidden = false;
+	const controller = new AbortController();
+	const timeoutId = setTimeout(function () {
+		controller.abort();
+	}, 15000);
 
 	try {
 		const startDate = startDateInput.value;
@@ -204,7 +219,7 @@ async function fetchGallery(event) {
 		apiUrl.searchParams.set('end_date', endDate);
 		apiUrl.searchParams.set('api_key', apiKey);
 
-		const response = await fetch(apiUrl);
+		const response = await fetch(apiUrl, { signal: controller.signal });
 		const data = await response.json();
 
 		if (!response.ok) {
@@ -215,10 +230,15 @@ async function fetchGallery(event) {
 		const items = getApiItems(data);
 		displayGallery(items);
 	} catch (error) {
-		errorMessage.textContent = error.message || 'The gallery could not be loaded. Please try again.';
+		if (error.name === 'AbortError') {
+			errorMessage.textContent = 'The NASA request timed out. Check your connection and try again.';
+		} else {
+			errorMessage.textContent = error.message || 'The gallery could not be loaded. Please try again.';
+		}
 		errorMessage.hidden = false;
 		galleryStatus.textContent = 'Gallery could not be loaded';
 	} finally {
+		clearTimeout(timeoutId);
 		loadingMessage.hidden = true;
 	}
 }
@@ -235,4 +255,4 @@ detailModal.addEventListener('click', function (event) {
 
 setDefaultDates();
 showRandomSpaceFact();
-dateForm.requestSubmit();
+galleryStatus.textContent = 'Choose a date range, then select Get Space Images.';
