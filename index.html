@@ -3,95 +3,115 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#ffffff" />
-    <title>Clean Water Quest | charity: water</title>
+    <meta name="theme-color" content="#050914" />
+    <meta
+      name="description"
+      content="Explore nine days of NASA's Astronomy Picture of the Day."
+    />
+    <title>APOD Explorer | NASA</title>
     <link rel="stylesheet" href="style.css" />
     <script src="script.js" defer></script>
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href="#home" aria-label="charity: water home">
-        <span class="brand-drop" aria-hidden="true"></span>
-        <span>charity<span class="brand-colon">:</span> water</span>
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="APOD Explorer home">
+        <span class="orbit" aria-hidden="true"></span>
+        <span>
+          <strong>APOD EXPLORER</strong>
+          <small>NASA · Astronomy Picture of the Day</small>
+        </span>
       </a>
-      <span class="header-note">A little game. A big difference.</span>
+      <span class="tag">A new view of the universe, every day.</span>
     </header>
 
     <main id="home">
-      <section class="intro" aria-labelledby="gameTitle">
-        <p class="eyebrow">THE CLEAN WATER QUEST</p>
-        <h1 id="gameTitle">Every drop counts.</h1>
-        <p class="intro-copy">
-          Answer clean-water questions, earn bonus drops, and keep your lives to finish the quiz.
+      <section class="hero" aria-labelledby="pageTitle">
+        <p class="eyebrow">YOUR WINDOW TO THE COSMOS</p>
+        <h1 id="pageTitle">The universe,<br /><span>one day at a time.</span></h1>
+        <p class="intro">
+          Explore NASA's Astronomy Picture of the Day. Choose a nine-day
+          window, open any discovery for its full image and story, and find
+          something new among the stars.
         </p>
+
+        <form class="date-panel" id="dateForm">
+          <label>
+            Start date
+            <input id="startDate" name="startDate" type="date" required />
+          </label>
+          <label>
+            End date
+            <input id="endDate" name="endDate" type="date" required />
+          </label>
+          <label class="api-key-field">
+            NASA API key
+            <input
+              id="apiKey"
+              name="apiKey"
+              type="password"
+              value="DEMO_KEY"
+              autocomplete="off"
+              spellcheck="false"
+              aria-describedby="apiHint"
+              required
+            />
+          </label>
+          <button type="submit">Explore these days</button>
+          <p class="hint" id="apiHint">
+            Select a nine-day inclusive range (the end date is eight days
+            after the start). DEMO_KEY works for trying this page; your key
+            is sent only to NASA.
+          </p>
+        </form>
       </section>
 
-      <section class="game-card" aria-label="Clean Water Quest game">
-        <div class="game-top">
+      <aside class="fact" aria-labelledby="factHeading">
+        <strong id="factHeading">DID YOU KNOW?</strong>
+        <p id="spaceFact"></p>
+      </aside>
+
+      <section class="gallery-section" aria-labelledby="galleryTitle">
+        <div class="section-head">
           <div>
-            <p class="eyebrow">RANDOM WATER REWARDS</p>
-            <p class="score-line"><span id="score">0</span><span class="score-goal"> bonus drops</span></p>
+            <p class="eyebrow">THE DAILY ARCHIVE</p>
+            <h2 id="galleryTitle">Nine days in space</h2>
           </div>
-          <div class="game-actions">
-            <button class="start-button" id="startButton" type="button">Start</button>
-            <button class="reset-button" id="resetButton" type="button">Reset</button>
-            <button class="sound-button" id="soundButton" type="button" aria-pressed="true" aria-label="Turn sound off">🔊</button>
-          </div>
+          <p id="galleryStatus" role="status" aria-live="polite"></p>
         </div>
 
-        <div class="difficulty-control">
-          <label for="difficulty">Difficulty</label>
-          <select id="difficulty">
-            <option value="easy">Easy</option>
-            <option value="normal" selected>Normal</option>
-            <option value="hard">Hard</option>
-          </select>
-          <p id="difficultyDescription">Start with 5 lives. Correct answers add a life.</p>
+        <div class="loading" id="loadingMessage" role="status" aria-live="polite" hidden>
+          <span class="spinner" aria-hidden="true"></span>
+          <span>
+            <strong>Gathering the latest discoveries…</strong>
+            <small>Connecting to NASA's Astronomy Picture of the Day API</small>
+          </span>
         </div>
-
-        <p class="lives-display">Lives: <span id="lives">5</span></p>
-        <div class="score-track" role="progressbar" aria-label="Quiz questions answered" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
-          <div class="score-fill" id="scoreFill"></div>
-        </div>
-
-        <p class="round-display" id="roundDisplay">Question 1 of 10</p>
-        <p class="game-message" id="gameMessage" role="status" aria-live="polite">
-          Choose a difficulty, then select Start to play.
-        </p>
-
-        <h2 class="question-prompt" id="questionPrompt"></h2>
-        <p class="box-instruction">Pick the box with the best answer:</p>
-        <div class="quiz-answers" id="answerList" aria-label="Answer choices"></div>
-        <button class="next-button" id="nextButton" type="button" hidden>Next question</button>
-
-        <p class="game-hint">
-          Correct: +1 life and a random 1–3 bonus drops.
-          <span class="hint-divider" aria-hidden="true">·</span>
-          Incorrect: −1 life.
-        </p>
-
-        <div class="celebration" id="celebration" role="status" aria-live="polite" hidden>
-          <div class="confetti" id="confetti" aria-hidden="true"></div>
-          <span class="celebration-icon" id="celebrationIcon" aria-hidden="true">🎉</span>
-          <h2 id="celebrationTitle">Quiz complete!</h2>
-          <p id="celebrationText">You collected 10 clean water drops. Every drop makes a difference!</p>
-        </div>
+        <p class="error" id="errorMessage" role="alert" hidden></p>
+        <div class="gallery" id="gallery" aria-label="NASA Astronomy Picture of the Day gallery"></div>
       </section>
-
-      <p class="mission-note">
-        <span class="mission-drop" aria-hidden="true"></span>
-        Clean water changes everything. Learn more about the mission at
-        <a href="https://www.charitywater.org/" target="_blank" rel="noreferrer">charity: water</a>.
-      </p>
     </main>
+
+    <dialog class="modal" id="detailModal" aria-labelledby="modalTitle">
+      <div class="modal-card">
+        <button class="close" id="closeModal" type="button" aria-label="Close details">
+          &times;
+        </button>
+        <div class="modal-media" id="modalMedia"></div>
+        <div class="modal-copy">
+          <p class="eyebrow">NASA ASTRONOMY PICTURE OF THE DAY</p>
+          <p class="card-date" id="modalDate"></p>
+          <h2 id="modalTitle"></h2>
+          <p class="credit" id="modalCredit" hidden></p>
+          <p id="modalExplanation"></p>
+        </div>
+      </div>
+    </dialog>
+
     <footer>
-      <p>Made to celebrate a world where everyone has access to clean water.</p>
-      <p>Created by Richmond Korsah</p>
-      <nav aria-label="charity: water links">
-        <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">Visit charity: water</a>
-        <span aria-hidden="true">·</span>
-        <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer">Donate to clean water projects</a>
-      </nav>
+      <p>Images and astronomy descriptions provided by NASA's APOD API.</p>
+      <a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener noreferrer">
+        Visit NASA's APOD archive
+      </a>
     </footer>
   </body>
 </html>

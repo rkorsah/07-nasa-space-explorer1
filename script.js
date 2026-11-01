@@ -1,465 +1,238 @@
-const scoreDisplay = document.getElementById('score');
-const livesDisplay = document.getElementById('lives');
-const scoreFill = document.getElementById('scoreFill');
-const scoreTrack = document.querySelector('.score-track');
-const gameMessage = document.getElementById('gameMessage');
-const roundDisplay = document.getElementById('roundDisplay');
-const questionPrompt = document.getElementById('questionPrompt');
-const answerList = document.getElementById('answerList');
-const nextButton = document.getElementById('nextButton');
-const startButton = document.getElementById('startButton');
-const resetButton = document.getElementById('resetButton');
-const soundButton = document.getElementById('soundButton');
-const difficultySelect = document.getElementById('difficulty');
-const difficultyDescription = document.getElementById('difficultyDescription');
-const celebration = document.getElementById('celebration');
-const celebrationTitle = document.getElementById('celebrationTitle');
-const celebrationText = document.getElementById('celebrationText');
-const celebrationIcon = document.getElementById('celebrationIcon');
-const confetti = document.getElementById('confetti');
+const dateForm = document.getElementById('dateForm');
+const startDateInput = document.getElementById('startDate');
+const endDateInput = document.getElementById('endDate');
+const apiKeyInput = document.getElementById('apiKey');
+const loadingMessage = document.getElementById('loadingMessage');
+const errorMessage = document.getElementById('errorMessage');
+const gallery = document.getElementById('gallery');
+const galleryStatus = document.getElementById('galleryStatus');
+const spaceFact = document.getElementById('spaceFact');
+const detailModal = document.getElementById('detailModal');
+const closeModalButton = document.getElementById('closeModal');
+const modalMedia = document.getElementById('modalMedia');
+const modalDate = document.getElementById('modalDate');
+const modalTitle = document.getElementById('modalTitle');
+const modalCredit = document.getElementById('modalCredit');
+const modalExplanation = document.getElementById('modalExplanation');
 
-const difficultySettings = {
-	easy: {
-		startingLives: 6,
-		description: 'Start with 6 lives. Correct answers add a life.'
-	},
-	normal: {
-		startingLives: 5,
-		description: 'Start with 5 lives. Correct answers add a life.'
-	},
-	hard: {
-		startingLives: 4,
-		description: 'Start with 4 lives. Correct answers add a life.'
-	}
-};
-
-const questions = [
-	{
-		question: 'What is charity: water’s mission?',
-		choices: [
-			'Bring clean and safe drinking water to people in need',
-			'Build roads in every city',
-			'Deliver books to every school',
-			'Protect wild animals in the ocean'
-		],
-		answer: 'Bring clean and safe drinking water to people in need'
-	},
-	{
-		question: 'Why is clean drinking water important?',
-		choices: [
-			'It helps people stay healthy',
-			'It makes the sun shine',
-			'It stops all rain',
-			'It makes food grow without soil'
-		],
-		answer: 'It helps people stay healthy'
-	},
-	{
-		question: 'Which action can help save water at home?',
-		choices: [
-			'Turn off the tap while brushing your teeth',
-			'Leave every tap running',
-			'Wash one cup at a time under running water',
-			'Take extra-long showers'
-		],
-		answer: 'Turn off the tap while brushing your teeth'
-	},
-	{
-		question: 'What should you do with trash near a stream?',
-		choices: [
-			'Put it in a bin so it does not pollute the water',
-			'Throw it into the stream',
-			'Leave it on the ground',
-			'Push it toward a drain'
-		],
-		answer: 'Put it in a bin so it does not pollute the water'
-	},
-	{
-		question: 'What is one way clean water can help a community?',
-		choices: [
-			'People can spend less time looking for water',
-			'People no longer need to eat',
-			'It makes every day a holiday',
-			'It turns salt water into juice'
-		],
-		answer: 'People can spend less time looking for water'
-	},
-	{
-		question: 'Which is a safe habit when drinking water?',
-		choices: [
-			'Use clean water from a safe source',
-			'Drink water from any puddle',
-			'Share an unwashed cup with everyone',
-			'Store drinking water in an open, dirty container'
-		],
-		answer: 'Use clean water from a safe source'
-	},
-	{
-		question: 'What can happen when water is polluted?',
-		choices: [
-			'It can become unsafe for people to drink',
-			'It always becomes cleaner',
-			'It turns into fresh fruit',
-			'It can no longer flow'
-		],
-		answer: 'It can become unsafe for people to drink'
-	},
-	{
-		question: 'Which choice is kind to the environment?',
-		choices: [
-			'Use only the water you need',
-			'Let the garden hose run all day',
-			'Pour paint into a storm drain',
-			'Leave litter beside a river'
-		],
-		answer: 'Use only the water you need'
-	},
-	{
-		question: 'What does safe drinking water help protect?',
-		choices: [
-			'People’s health',
-			'Only shoes',
-			'The color of clouds',
-			'The shape of mountains'
-		],
-		answer: 'People’s health'
-	},
-	{
-		question: 'What is a helpful way to support clean water?',
-		choices: [
-			'Learn about the issue and share what you learn',
-			'Waste water on purpose',
-			'Drop trash in a lake',
-			'Ignore water safety'
-		],
-		answer: 'Learn about the issue and share what you learn'
-	}
+const spaceFacts = [
+	'Neutron stars can spin hundreds of times every second.',
+	'There are more stars in the observable universe than grains of sand on Earth.',
+	'One day on Venus is longer than one year on Venus.',
+	'The footprints left on the Moon can last for millions of years.',
+	'Light from the Sun takes about eight minutes to reach Earth.'
 ];
 
-let score = 0;
-let lives = difficultySettings.normal.startingLives;
-let questionIndex = 0;
-let gameOver = false;
-let gameStarted = false;
-let answeredQuestion = false;
-let shuffledQuestions = [];
-let currentSettings = difficultySettings.normal;
-let audioContext;
-let soundEnabled = true;
-
-function playSound(frequency, duration) {
-	if (!soundEnabled) {
-		return;
-	}
-
-	const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-
-	if (!AudioContextClass) {
-		return;
-	}
-
-	if (!audioContext) {
-		audioContext = new AudioContextClass();
-	}
-
-	if (audioContext.state === 'suspended') {
-		audioContext.resume();
-	}
-
-	const oscillator = audioContext.createOscillator();
-	const volume = audioContext.createGain();
-	oscillator.frequency.value = frequency;
-	volume.gain.setValueAtTime(0.12, audioContext.currentTime);
-	volume.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-	oscillator.connect(volume);
-	volume.connect(audioContext.destination);
-	oscillator.start();
-	oscillator.stop(audioContext.currentTime + duration);
+function getDateString(date) {
+	return date.toISOString().slice(0, 10);
 }
 
-function playBoxSound() {
-	playSound(440, 0.1);
+function setDefaultDates() {
+	const yesterday = new Date();
+	yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+	const startDate = new Date(yesterday);
+	startDate.setUTCDate(startDate.getUTCDate() - 8);
+	const latestDate = getDateString(yesterday);
+
+	startDateInput.value = getDateString(startDate);
+	endDateInput.value = latestDate;
+	startDateInput.max = latestDate;
+	endDateInput.max = latestDate;
 }
 
-function playWinSound() {
-	const notes = [523, 659, 784, 1047, 1319];
+function showRandomSpaceFact() {
+	const randomIndex = Math.floor(Math.random() * spaceFacts.length);
+	spaceFact.textContent = spaceFacts[randomIndex];
+}
 
-	for (let index = 0; index < notes.length; index++) {
-		setTimeout(function () {
-			playSound(notes[index], 0.22);
-		}, index * 170);
+function formatDate(dateString) {
+	const date = new Date(`${dateString}T12:00:00Z`);
+	return new Intl.DateTimeFormat('en-US', {
+		month: 'long',
+		day: 'numeric',
+		year: 'numeric',
+		timeZone: 'UTC'
+	}).format(date);
+}
+
+function validateDateRange(startDate, endDate) {
+	const startTime = Date.parse(`${startDate}T00:00:00Z`);
+	const endTime = Date.parse(`${endDate}T00:00:00Z`);
+	const daysBetween = (endTime - startTime) / (1000 * 60 * 60 * 24);
+
+	if (!Number.isFinite(startTime) || !Number.isFinite(endTime)) {
+		throw new Error('Choose a valid start date and end date.');
+	}
+
+	if (daysBetween !== 8) {
+		throw new Error('Choose dates exactly eight days apart to load nine consecutive days.');
 	}
 }
 
-function playLoseSound() {
-	const notes = [392, 330, 262];
+function createCard(item) {
+	const card = document.createElement('button');
+	card.className = 'card';
+	card.type = 'button';
+	card.setAttribute('aria-label', `Open ${item.title}, ${formatDate(item.date)}`);
 
-	for (let index = 0; index < notes.length; index++) {
-		setTimeout(function () {
-			playSound(notes[index], 0.3);
-		}, index * 200);
-	}
-}
+	const media = document.createElement('span');
+	media.className = 'card-media';
 
-function shuffleItems(items) {
-	for (let index = items.length - 1; index > 0; index--) {
-		const randomIndex = Math.floor(Math.random() * (index + 1));
-		const currentItem = items[index];
-		items[index] = items[randomIndex];
-		items[randomIndex] = currentItem;
-	}
-
-	return items;
-}
-
-function updateScore() {
-	scoreDisplay.textContent = score;
-}
-
-function updateLives() {
-	livesDisplay.textContent = lives;
-}
-
-function updateProgress() {
-	const answeredCount = questionIndex + 1;
-	scoreFill.style.width = `${answeredCount / shuffledQuestions.length * 100}%`;
-	scoreTrack.setAttribute('aria-valuenow', answeredCount);
-}
-
-function renderQuestion() {
-	const currentQuestion = shuffledQuestions[questionIndex];
-	const incorrectChoices = currentQuestion.choices.filter(function (choice) {
-		return choice !== currentQuestion.answer;
-	});
-	const boxChoices = [currentQuestion.answer];
-
-	for (let index = 0; index < 8; index++) {
-		const randomIndex = Math.floor(Math.random() * incorrectChoices.length);
-		boxChoices.push(incorrectChoices[randomIndex]);
-	}
-
-	const shuffledChoices = shuffleItems(boxChoices);
-	questionPrompt.textContent = currentQuestion.question;
-	roundDisplay.textContent = `Question ${questionIndex + 1} of ${shuffledQuestions.length}`;
-	answerList.innerHTML = '';
-	answeredQuestion = false;
-	nextButton.hidden = true;
-	nextButton.disabled = true;
-	nextButton.textContent = questionIndex === shuffledQuestions.length - 1 ? 'Finish quiz' : 'Next question';
-
-	for (let index = 0; index < shuffledChoices.length; index++) {
-		const answerButton = document.createElement('button');
-		answerButton.className = 'quiz-answer';
-		answerButton.type = 'button';
-		answerButton.dataset.answer = shuffledChoices[index];
-		answerButton.dataset.boxNumber = index + 1;
-		answerButton.setAttribute('aria-label', `Mystery water box ${index + 1}`);
-		answerButton.disabled = !gameStarted;
-
-		const boxNumber = document.createElement('span');
-		boxNumber.className = 'box-number';
-		boxNumber.textContent = `BOX ${index + 1}`;
-		boxNumber.setAttribute('aria-hidden', 'true');
-
-		const boxIcon = document.createElement('span');
-		boxIcon.className = 'box-icon';
-		boxIcon.textContent = '📦';
-		boxIcon.setAttribute('aria-hidden', 'true');
-
-		const boxPrompt = document.createElement('span');
-		boxPrompt.className = 'box-prompt';
-		boxPrompt.textContent = 'Tap to reveal';
-		boxPrompt.setAttribute('aria-hidden', 'true');
-
-		const answerText = document.createElement('span');
-		answerText.className = 'box-answer';
-		answerText.textContent = shuffledChoices[index];
-		answerText.hidden = true;
-
-		answerButton.appendChild(boxNumber);
-		answerButton.appendChild(boxIcon);
-		answerButton.appendChild(boxPrompt);
-		answerButton.appendChild(answerText);
-		answerButton.addEventListener('click', handleAnswerClick);
-		answerList.appendChild(answerButton);
-	}
-}
-
-function disableAnswers() {
-	const answerButtons = answerList.querySelectorAll('.quiz-answer');
-
-	for (let index = 0; index < answerButtons.length; index++) {
-		answerButtons[index].disabled = true;
-	}
-}
-
-function enableAnswers() {
-	const answerButtons = answerList.querySelectorAll('.quiz-answer');
-
-	for (let index = 0; index < answerButtons.length; index++) {
-		answerButtons[index].disabled = false;
-	}
-}
-
-function createConfetti() {
-	const colors = ['confetti-yellow', 'confetti-blue', 'confetti-teal'];
-	confetti.innerHTML = '';
-
-	for (let index = 0; index < 30; index++) {
-		const piece = document.createElement('span');
-		piece.className = `confetti-piece ${colors[index % colors.length]}`;
-		piece.style.left = `${index / 30 * 100}%`;
-		piece.style.animationDelay = `${index % 8 * 0.08}s`;
-		confetti.appendChild(piece);
-	}
-}
-
-function endGame(won) {
-	gameOver = true;
-	startButton.disabled = false;
-	startButton.textContent = 'Play again';
-	nextButton.hidden = true;
-	disableAnswers();
-
-	if (won) {
-		celebrationTitle.textContent = 'Quest complete!';
-		celebrationText.textContent = `You finished the clean-water quiz with ${score} bonus drops and ${lives} lives left. Every drop makes a difference!`;
-		gameMessage.textContent = 'You answered every question. Great work!';
-		celebration.classList.remove('is-loss');
-		celebration.hidden = false;
-		celebrationIcon.textContent = '🎉';
-		createConfetti();
-		playWinSound();
-		return;
-	}
-
-	celebrationTitle.textContent = 'Out of lives';
-	celebrationText.textContent = `You earned ${score} bonus drops. Start another quiz and try again!`;
-	celebration.classList.add('is-loss');
-	celebrationIcon.textContent = '💧';
-	celebration.hidden = false;
-	gameMessage.textContent = 'You ran out of lives. Select Play again to take the quiz once more.';
-	playLoseSound();
-}
-
-function handleAnswerClick(event) {
-	if (!gameStarted || gameOver || answeredQuestion) {
-		return;
-	}
-
-	answeredQuestion = true;
-	const selectedAnswer = event.currentTarget.dataset.answer;
-	const currentQuestion = shuffledQuestions[questionIndex];
-	const answerButtons = answerList.querySelectorAll('.quiz-answer');
-	const isCorrect = selectedAnswer === currentQuestion.answer;
-
-	for (let index = 0; index < answerButtons.length; index++) {
-		answerButtons[index].disabled = true;
-	}
-
-	event.currentTarget.querySelector('.box-answer').hidden = false;
-	event.currentTarget.querySelector('.box-prompt').hidden = true;
-	event.currentTarget.setAttribute('aria-label', `Box ${event.currentTarget.dataset.boxNumber}: ${selectedAnswer}`);
-	playBoxSound();
-
-	if (isCorrect) {
-		const bonusDrops = Math.floor(Math.random() * 3) + 1;
-		lives++;
-		score += bonusDrops;
-		event.currentTarget.classList.add('is-correct');
-		gameMessage.textContent = `Correct! You gained 1 life and a random reward of ${bonusDrops} bonus ${bonusDrops === 1 ? 'drop' : 'drops'}.`;
-		playSound(660, 0.14);
+	if (item.media_type === 'image') {
+		const image = document.createElement('img');
+		image.src = item.url;
+		image.alt = item.title;
+		image.loading = 'lazy';
+		media.appendChild(image);
 	} else {
-		lives--;
-		event.currentTarget.classList.add('is-incorrect');
-		event.currentTarget.setAttribute('aria-label', `Incorrect answer in box ${event.currentTarget.dataset.boxNumber}: ${selectedAnswer}`);
-		gameMessage.textContent = `Not quite. You lost 1 life. The correct answer is: ${currentQuestion.answer}.`;
-		playSound(190, 0.2);
+		const videoFallback = document.createElement('span');
+		videoFallback.className = 'fallback';
+		videoFallback.innerHTML = '<span><strong>VIDEO APOD</strong><small>Open to watch</small></span>';
+		media.appendChild(videoFallback);
+
+		const videoBadge = document.createElement('span');
+		videoBadge.className = 'video-badge';
+		videoBadge.textContent = '▶ VIDEO';
+		media.appendChild(videoBadge);
 	}
 
-	updateScore();
-	updateLives();
-	updateProgress();
+	const copy = document.createElement('span');
+	copy.className = 'card-copy';
 
-	if (lives <= 0) {
-		endGame(false);
-		return;
-	}
+	const date = document.createElement('span');
+	date.className = 'card-date';
+	date.textContent = formatDate(item.date);
 
-	nextButton.hidden = false;
-	nextButton.disabled = false;
+	const title = document.createElement('span');
+	title.className = 'card-title';
+	title.textContent = item.title;
+
+	copy.appendChild(date);
+	copy.appendChild(title);
+	card.appendChild(media);
+	card.appendChild(copy);
+	card.addEventListener('click', function () {
+		openDetails(item);
+	});
+
+	return card;
 }
 
-function showNextQuestion() {
-	if (!answeredQuestion || gameOver) {
-		return;
+function displayGallery(items) {
+	gallery.replaceChildren();
+
+	for (let index = 0; index < items.length; index++) {
+		gallery.appendChild(createCard(items[index]));
 	}
 
-	if (questionIndex === shuffledQuestions.length - 1) {
-		endGame(true);
-		return;
-	}
-
-	questionIndex++;
-	renderQuestion();
-	enableAnswers();
-	gameMessage.textContent = 'Choose the best answer.';
+	galleryStatus.textContent = `${items.length} days of discoveries`;
 }
 
-function startGame() {
-	if (gameOver) {
-		resetGame();
+function openDetails(item) {
+	modalMedia.replaceChildren();
+	modalDate.textContent = formatDate(item.date);
+	modalTitle.textContent = item.title;
+	modalExplanation.textContent = item.explanation;
+
+	if (item.copyright) {
+		modalCredit.textContent = `Image credit: ${item.copyright}`;
+		modalCredit.hidden = false;
+	} else {
+		modalCredit.hidden = true;
 	}
 
-	if (gameStarted) {
-		return;
+	if (item.media_type === 'image') {
+		const image = document.createElement('img');
+		image.src = item.hdurl || item.url;
+		image.alt = item.title;
+		modalMedia.appendChild(image);
+	} else {
+		const videoLink = document.createElement('a');
+		videoLink.className = 'video-link';
+		videoLink.href = item.url;
+		videoLink.target = '_blank';
+		videoLink.rel = 'noopener noreferrer';
+		videoLink.textContent = 'Watch this APOD video on its source site';
+		modalMedia.appendChild(videoLink);
 	}
 
-	gameStarted = true;
-	startButton.disabled = true;
-	startButton.textContent = 'Playing';
-	gameMessage.textContent = 'Choose the best answer.';
-	enableAnswers();
+	detailModal.showModal();
 }
 
-function resetGame() {
-	currentSettings = difficultySettings[difficultySelect.value];
-	score = 0;
-	lives = currentSettings.startingLives;
-	questionIndex = 0;
-	gameOver = false;
-	gameStarted = false;
-	answeredQuestion = false;
-	shuffledQuestions = shuffleItems(questions.slice());
-	startButton.disabled = false;
-	startButton.textContent = 'Start';
-	celebration.hidden = true;
-	celebration.classList.remove('is-loss');
-	confetti.innerHTML = '';
-	difficultyDescription.textContent = currentSettings.description;
-	gameMessage.textContent = 'Choose a difficulty, then select Start to play.';
-	scoreTrack.setAttribute('aria-valuemax', shuffledQuestions.length);
-	scoreTrack.setAttribute('aria-valuenow', 0);
-	scoreFill.style.width = '0%';
-	updateScore();
-	updateLives();
-	renderQuestion();
+function getApiItems(data) {
+	if (!Array.isArray(data)) {
+		throw new Error('NASA returned an unexpected response. Please try again.');
+	}
+
+	if (data.length !== 9) {
+		throw new Error(`NASA returned ${data.length} items instead of 9. Try another date range.`);
+	}
+
+	for (let index = 0; index < data.length; index++) {
+		const item = data[index];
+		const hasSupportedMedia = item.media_type === 'image' || item.media_type === 'video';
+
+		if (!item.title || !item.date || !item.explanation || !item.url || !hasSupportedMedia) {
+			throw new Error('NASA returned an incomplete gallery item. Please try again.');
+		}
+	}
+
+	return data;
 }
 
-function toggleSound() {
-	soundEnabled = !soundEnabled;
-	soundButton.textContent = soundEnabled ? '🔊' : '🔇';
-	soundButton.setAttribute('aria-pressed', soundEnabled);
-	soundButton.setAttribute('aria-label', soundEnabled ? 'Turn sound off' : 'Turn sound on');
+async function fetchGallery(event) {
+	event.preventDefault();
+	errorMessage.hidden = true;
+	errorMessage.textContent = '';
+	gallery.replaceChildren();
+	galleryStatus.textContent = '';
+	loadingMessage.hidden = false;
 
-	if (soundEnabled) {
-		playSound(587, 0.12);
+	try {
+		const startDate = startDateInput.value;
+		const endDate = endDateInput.value;
+		const apiKey = apiKeyInput.value.trim();
+
+		validateDateRange(startDate, endDate);
+
+		if (!apiKey) {
+			throw new Error('Enter a NASA API key. DEMO_KEY is available for testing.');
+		}
+
+		const apiUrl = new URL('https://api.nasa.gov/planetary/apod');
+		apiUrl.searchParams.set('start_date', startDate);
+		apiUrl.searchParams.set('end_date', endDate);
+		apiUrl.searchParams.set('api_key', apiKey);
+
+		const response = await fetch(apiUrl);
+		const data = await response.json();
+
+		if (!response.ok) {
+			const message = data.msg || data.message || `NASA API request failed (${response.status}).`;
+			throw new Error(message);
+		}
+
+		const items = getApiItems(data);
+		displayGallery(items);
+	} catch (error) {
+		errorMessage.textContent = error.message || 'The gallery could not be loaded. Please try again.';
+		errorMessage.hidden = false;
+		galleryStatus.textContent = 'Gallery could not be loaded';
+	} finally {
+		loadingMessage.hidden = true;
 	}
 }
 
-startButton.addEventListener('click', startGame);
-resetButton.addEventListener('click', resetGame);
-soundButton.addEventListener('click', toggleSound);
-nextButton.addEventListener('click', showNextQuestion);
-difficultySelect.addEventListener('change', resetGame);
-resetGame();
+dateForm.addEventListener('submit', fetchGallery);
+closeModalButton.addEventListener('click', function () {
+	detailModal.close();
+});
+detailModal.addEventListener('click', function (event) {
+	if (event.target === detailModal) {
+		detailModal.close();
+	}
+});
+
+setDefaultDates();
+showRandomSpaceFact();
+dateForm.requestSubmit();
