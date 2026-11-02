@@ -14,6 +14,9 @@ a key at [api.nasa.gov](https://api.nasa.gov/) and enter it in the NASA API
 key field. The key is sent to NASA with the API request and is not saved by
 this page.
 
+Students, teachers, or classrooms can enter a name for a personalized welcome.
+The name stays in the page and is not sent to NASA.
+
 Choose nine consecutive dates, with the end date exactly eight days after the
 start date. APOD dates begin June 16, 1995, and cannot be later than today.
 APOD video entries are marked in the gallery and include a link to watch the

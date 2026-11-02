@@ -1,4 +1,6 @@
 const dateForm = document.getElementById('dateForm');
+const clientNameInput = document.getElementById('clientName');
+const welcomeMessage = document.getElementById('welcomeMessage');
 const startDateInput = document.getElementById('startDate');
 const endDateInput = document.getElementById('endDate');
 const apiKeyInput = document.getElementById('apiKey');
@@ -48,6 +50,17 @@ function setDefaultDates() {
 function showRandomSpaceFact() {
 	const randomIndex = Math.floor(Math.random() * spaceFacts.length);
 	spaceFact.textContent = spaceFacts[randomIndex];
+}
+
+function updateWelcomeMessage() {
+	const clientName = clientNameInput.value.trim();
+
+	if (clientName) {
+		welcomeMessage.textContent = `Welcome, ${clientName}! Ready to explore?`;
+		return;
+	}
+
+	welcomeMessage.textContent = 'Welcome, space explorers!';
 }
 
 function formatDate(dateString) {
@@ -245,6 +258,7 @@ async function fetchGallery(event) {
 }
 
 dateForm.addEventListener('submit', fetchGallery);
+clientNameInput.addEventListener('input', updateWelcomeMessage);
 closeModalButton.addEventListener('click', function () {
 	detailModal.close();
 });

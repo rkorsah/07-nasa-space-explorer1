@@ -27,14 +27,28 @@
     <main id="home">
       <section class="hero" aria-labelledby="pageTitle">
         <p class="eyebrow">YOUR WINDOW TO THE COSMOS</p>
+        <p class="welcome-message" id="welcomeMessage" aria-live="polite">
+          Welcome, space explorers!
+        </p>
         <h1 id="pageTitle">The universe,<br /><span>one day at a time.</span></h1>
         <p class="intro">
-          Explore NASA's Astronomy Picture of the Day. Choose a nine-day
-          window, open any discovery for its full image and story, and find
-          something new among the stars.
+          A classroom-sized window to NASA's Astronomy Picture of the Day.
+          Explore nine days of discoveries, then open an image to uncover the
+          story behind it.
         </p>
 
         <form class="date-panel" id="dateForm">
+          <label class="personal-name-field">
+            Student, teacher, or classroom name <span>(optional)</span>
+            <input
+              id="clientName"
+              name="clientName"
+              type="text"
+              maxlength="60"
+              placeholder="For example, Ms. Korsah's class"
+              autocomplete="off"
+            />
+          </label>
           <label>
             Start date
             <input id="startDate" name="startDate" type="date" required />
@@ -60,7 +74,8 @@
           <p class="hint" id="apiHint">
             Select nine consecutive days (the end date is eight days after
             the start). APOD dates begin June 16, 1995. DEMO_KEY works for
-            trying this page; your key is sent only to NASA.
+            trying this page; your key is sent only to NASA. Your name stays
+            on this page and is not included in the NASA request.
           </p>
         </form>
       </section>
